@@ -24,7 +24,9 @@ export function checkCollision(a, b) {
 
 // Optional: Draw hitbox outline for debugging
 export function drawHitbox(ctx, entity, type) {
+  console.log('drawHitbox called with type:', type, 'entity:', { x: entity.x, y: entity.y, width: entity.width, height: entity.height, type: entity.type });
   const hb = getHitbox(entity, type);
+  console.log('drawHitbox calculated hitbox (hb):', hb);
   ctx.strokeStyle = 'lime';
   ctx.lineWidth = 1;
   ctx.strokeRect(hb.x, hb.y, hb.width, hb.height);

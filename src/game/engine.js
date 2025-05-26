@@ -103,6 +103,10 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 4) Reset Logic ───────────────────────────────────────
   const resetGame = () => {
+    // clear existing timeouts
+    clearTimeout(invincibilityTimeoutId);
+    clearTimeout(gameStartTimeoutId);
+
     // clear everything
     bullets.length = 0;
     enemies.length = 0;
@@ -219,8 +223,21 @@ const MIN_COLLISION_OVERLAP = 8;
     drawHitbox(ctx, player, 'player');
 
     // enemies & collision
+    console.log('Loop Start - Enemies Array:', JSON.stringify(enemies.map(e => ({ x: e.x, y: e.y, type: e.type, width: e.width, height: e.height, imageSrc: e.image ? e.image.src : 'No image', imageComplete: e.image ? e.image.complete : 'No image' }))));
     for (let i = enemies.length - 1; i >= 0; i--) {
       const enemy   = enemies[i];
+      console.log('Processing Enemy:', {
+        index: i,
+        x: enemy.x,
+        y: enemy.y,
+        width: enemy.width,
+        height: enemy.height,
+        type: enemy.type,
+        rotation: enemy.rotation,
+        flopTimer: enemy.flopTimer,
+        imageSrc: enemy.image ? enemy.image.src : 'No image object',
+        imageComplete: enemy.image ? enemy.image.complete : 'No image object'
+      });
       const boxType = enemy.type === 'chaser' ? 'enemyChaser' : 'enemyShooter';
 
       // movement
