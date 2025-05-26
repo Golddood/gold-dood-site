@@ -123,6 +123,12 @@ const MIN_COLLISION_OVERLAP = 8;
     frameCount = 0;
     elapsed    = 0;
     spawnTimer = ENEMY_SPAWN_INTERVAL;
+    canShoot   = true; // Reset shooting ability
+
+    // Clear any pressed keys
+    for (const key in keys) {
+      delete keys[key];
+    }
 
     // reset player pos
     player.x = LOGIC_WIDTH/2 - player.width/2;
