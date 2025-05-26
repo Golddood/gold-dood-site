@@ -48,6 +48,8 @@ const MIN_COLLISION_OVERLAP = 5;
   let frameCount    = 0;
   let elapsed       = 0;
   let animationId;
+  let invincibilityTimeoutId;
+  let gameStartTimeoutId;
   const laserCooldown = { value: 0 };
   const laserWarning  = { value: null };
   let gameRunning = true;
@@ -131,10 +133,10 @@ const MIN_COLLISION_OVERLAP = 5;
 
     // give a brief invincibility at start
     playerInvincible = true;
-    setTimeout(() => (playerInvincible = false), 2000);
+    invincibilityTimeoutId = setTimeout(() => (playerInvincible = false), 2000);
 
     // then kick off the loop
-    setTimeout(() => {
+    gameStartTimeoutId = setTimeout(() => {
       gameRunning = true;
       animationId = requestAnimationFrame(loop);
     }, 300);
@@ -310,6 +312,9 @@ if (enemy.y > LOGIC_HEIGHT) {
   resetGame();
   return () => {
     cancelAnimationFrame(animationId);
+    clearTimeout(invincibilityTimeoutId);
+    clearTimeout(gameStartTimeoutId);
+    gameRunning = false;
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('keyup',   handleKeyUp);
   };
