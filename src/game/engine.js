@@ -258,23 +258,39 @@ const MIN_COLLISION_OVERLAP = 8;
       }
 
       // draw
+      let drewSuccessfully = false;
       if (enemy.image?.complete) {
-        ctx.save();
-        ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
-        if (enemy.type === 'chaser') ctx.rotate(enemy.rotation || 0);
-        ctx.drawImage(
-          enemy.image,
-          -enemy.width/2,
-          -enemy.height/2,
-          enemy.width,
-          enemy.height
-        );
-        ctx.restore();
-      } else {
-        ctx.fillStyle = enemy.type === 'chaser' ? 'purple' : 'gray';
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        try {
+          ctx.save();
+          ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+          if (enemy.type === 'chaser') ctx.rotate(enemy.rotation || 0);
+          ctx.drawImage(
+            enemy.image,
+            -enemy.width/2,
+            -enemy.height/2,
+            enemy.width,
+            enemy.height
+          );
+          ctx.restore();
+          // Check if the image actually drew something (won't work if image is transparent)
+          // For now, assume success if no error and complete is true.
+          // A more robust check might involve getImageData, but that's slow.
+          drewSuccessfully = true; 
+        } catch (e) {
+          console.error("Error drawing enemy image:", e, enemy);
+          drewSuccessfully = false;
+        }
       }
-      drawHitbox(ctx, enemy, boxType);
+
+      if (!drewSuccessfully) { // If image object missing, or not complete, or drawImage failed or (heuristically) drew nothing
+        console.log(`Fallback drawing for enemy: ${enemy.type} at ${enemy.x}, ${enemy.y}. Image complete: ${enemy.image?.complete}`);
+        ctx.fillStyle = 'red'; // BRIGHT RED
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height); // Full enemy rect
+        ctx.font = '10px Arial';
+        ctx.fillStyle = 'white';
+        ctx.fillText(`FALLBACK ${enemy.type}`, enemy.x + 2, enemy.y + 10);
+      }
+      drawHitbox(ctx, enemy, boxType); // Hitbox is lime
 
       // collision check
 // after drawHitbox(ctx, enemy, boxType);
