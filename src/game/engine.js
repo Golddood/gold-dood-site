@@ -69,6 +69,11 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 3) Hit & Game-Over Handlers ─────────────────────────
   const handlePlayerHit = () => {
+    // New guard: If in lives mode and lives are already 0 or less, do nothing.
+    if (livesMode === 'lives' && livesRef.current <= 0) {
+      return;
+    }
+    // Existing guard
     if (!gameRunning || playerInvincible) return;
     // turn on invincibility
     playerInvincible = true;
