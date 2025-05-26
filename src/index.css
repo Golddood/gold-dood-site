@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global layout fixes for BoneShip full-screen game */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 🛑 Prevents scrolling */
+  background-color: black;
+  color: white;
+}
+
+/* Canvas should not have scrollbars or borders */
+canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: black;
+}
+
+canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}

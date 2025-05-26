@@ -1,0 +1,27 @@
+{
+  "name": "gold-dood-site",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^0.4.4",
+    "ethers": "^5.8.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-query": "^3.39.2",
+    "react-router-dom": "^7.6.0",
+    "viem": "^2.29.4",
+    "wagmi": "^0.5.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "vite": "^4.5.14"
+  }
+}
