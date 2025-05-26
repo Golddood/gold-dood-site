@@ -317,6 +317,25 @@ if (!playerInvincible && checkCollision(playerBox, enemyBox)) {
       'playerBox', playerBox,
       'enemyBox', enemyBox
     );
+
+    // HYPER-AGGRESSIVE DIAGNOSTIC DRAW FOR COLLIDING ENEMY
+    console.log('[DIAGNOSTIC DRAW] Attempting to highlight colliding enemy. Enemy details:', enemy, 'EnemyBox:', enemyBox);
+
+    // Clear a slightly larger area around the enemy's hitbox to ensure visibility
+    ctx.clearRect(enemyBox.x - 5, enemyBox.y - 5, enemyBox.width + 10, enemyBox.height + 10);
+
+    // Prominent hitbox style
+    ctx.strokeStyle = 'yellow'; // Bright yellow
+    ctx.lineWidth = 4;          // Very thick
+    ctx.setLineDash([5, 3]);    // Dashed line
+
+    // Re-draw the hitbox
+    ctx.strokeRect(enemyBox.x, enemyBox.y, enemyBox.width, enemyBox.height);
+
+    // Reset line dash for subsequent drawing
+    ctx.setLineDash([]);
+    // END DIAGNOSTIC DRAW
+
     enemies.splice(i, 1);
     handlePlayerHit();
     continue;
