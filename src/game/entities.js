@@ -29,13 +29,34 @@ export function spawnEnemies({ enemies, player, enemyMoveImage, enemyShootImage,
     if (!overlaps || tries > 10) break;
   } while (true);
 
+  // Player hitbox needs to be defined before the new check
+  const playerHitbox = getHitbox(player, 'player');
+  const enemyType = isChaser ? 'enemyChaser' : 'enemyShooter';
+
+  // New Projected Collision Check
+  const hypotheticalEnemyForCheck = {
+    x: x,
+    y: player.y, // Projecting enemy to player's Y level for the check
+    width: ENEMY_SIZE,
+    height: ENEMY_SIZE,
+  };
+  const projectedEnemyHitbox = getHitbox(hypotheticalEnemyForCheck, enemyType);
+
+  if (checkCollision(projectedEnemyHitbox, playerHitbox)) {
+    // If a collision is projected, do not spawn this enemy.
+    // Optional: Log why spawn was aborted
+    // console.log(`Spawn aborted for ${enemyType} at x: ${x} due to projected collision with player.`);
+    return;
+  }
+
+  // If the new projected collision check passes, then proceed to create the actual enemy
   const enemy = {
     x,
-    y: -ENEMY_SIZE,
+    y: -ENEMY_SIZE, // Actual spawn Y position
     width: ENEMY_SIZE,
     height: ENEMY_SIZE,
     direction: Math.random() < 0.5 ? 1 : -1,
-    type: isChaser ? 'chaser' : 'shooter',
+    type: enemyType,
     image: isChaser ? enemyMoveImage : enemyShootImage,
     ...(isChaser && {
       rotation: 0,
@@ -44,13 +65,8 @@ export function spawnEnemies({ enemies, player, enemyMoveImage, enemyShootImage,
     }),
   };
 
-  const enemyHitbox = getHitbox(enemy, isChaser ? 'enemyChaser' : 'enemyShooter');
-  const playerHitbox = getHitbox(player, 'player');
-
-  // Avoid unfair spawn on top of player
-  if (!checkCollision(enemyHitbox, playerHitbox)) {
-    enemies.push(enemy);
-  }
+  // The old check is removed. Push directly if the projected check passed.
+  enemies.push(enemy);
 }
 
 // Spawn Coins

@@ -144,6 +144,7 @@ const MIN_COLLISION_OVERLAP = 8;
     if (livesMode === 'lives') {
       livesRef.current = 3;
       setLives(3);
+      console.log('[resetGame] Lives reset. Current lives:', livesRef.current);
     }
 
     // give a brief invincibility at start
