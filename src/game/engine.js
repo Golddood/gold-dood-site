@@ -31,7 +31,7 @@ export function runGameEngine({
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 // how many pixels of overlap we require before we call it a hit
-const MIN_COLLISION_OVERLAP = 5;
+const MIN_COLLISION_OVERLAP = 8;
 
   // How long (ms) the player remains invincible after a hit
   const HIT_INVINCIBILITY_MS = 800;
