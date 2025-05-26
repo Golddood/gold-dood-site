@@ -66,7 +66,7 @@ function BoneshipPage() {
 
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-4 z-10">
           {/* Nav */}
-          <div className="absolute top-4 left-4 z-20 flex gap-4 font-semibold text-lg md:text-xl">
+          <div className="absolute top-4 left-4 z-20 flex gap-4 font-semibold text-lg md:text-xl font-fredoka">
   {['/', '/burn', '/boneship'].map((path, i) => {
     const labels = ['Home', 'Burn', 'Boneship'];
     const isActive = location.pathname === path;
