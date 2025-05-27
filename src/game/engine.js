@@ -59,6 +59,7 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // Player object
   const PLAYER_SIZE = 52;
+  const PLAYER_KNOCKBACK_DISTANCE = 40 * SCALE;
   const player = {
     x: LOGIC_WIDTH/2 - PLAYER_SIZE/2,
     y: LOGIC_HEIGHT - PLAYER_SIZE*1.5,
@@ -270,9 +271,10 @@ const MIN_COLLISION_OVERLAP = 8;
         }
 
         // Vertical movement
-        if (player.y > enemy.y) {
-          enemy.y += verticalSpeedPlayerTarget;
-        } else {
+        if (player.y > enemy.y) { // Player is below enemy
+          // Move towards player, but don't overshoot
+          enemy.y = Math.min(player.y, enemy.y + verticalSpeedPlayerTarget);
+        } else { // Player is above or at the same level
           enemy.y += standardFallSpeed;
         }
 
@@ -368,7 +370,29 @@ if (!playerInvincible && checkCollision(playerBox, enemyBox)) {
     ctx.setLineDash([]);
     // END DIAGNOSTIC DRAW
 
-    enemies.splice(i, 1);
+    // Player knockback logic
+    const playerCenterX = player.x + player.width / 2;
+    const playerCenterY = player.y + player.height / 2;
+    const enemyCenterX = enemy.x + enemy.width / 2;
+    const enemyCenterY = enemy.y + enemy.height / 2;
+
+    let dx = playerCenterX - enemyCenterX;
+    let dy = playerCenterY - enemyCenterY;
+
+    const length = Math.sqrt(dx * dx + dy * dy);
+    let normDx = 0;
+    let normDy = -1; // Default knockback direction (upwards) if centers overlap
+
+    if (length !== 0) {
+      normDx = dx / length;
+      normDy = dy / length;
+    }
+
+    player.x += normDx * PLAYER_KNOCKBACK_DISTANCE;
+    player.y += normDy * PLAYER_KNOCKBACK_DISTANCE;
+    
+    // Existing player boundary checks later in the loop will handle clamping.
+    // Enemy is NOT removed.
     handlePlayerHit();
     continue;
   }

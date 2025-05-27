@@ -40,7 +40,8 @@ function updateChaserMovement(enemy, player) {
 
   // Vertical movement
   if (player.y > newEnemyState.y) { // Player is below enemy
-    newEnemyState.y += verticalSpeedPlayerTarget;
+    // Apply the fix: Move towards player, but don't overshoot
+    newEnemyState.y = Math.min(player.y, newEnemyState.y + verticalSpeedPlayerTarget);
   } else { // Player is above or at the same level as enemy
     newEnemyState.y += STANDARD_FALL_SPEED;
   }
@@ -124,6 +125,18 @@ function runTests() {
   const enemy4_actual = updateChaserMovement(enemy4_initial, player4);
   assertEqual(enemy4_actual.x, enemy4_expected_x, "Scenario 4 - Enemy X position (overshoot)");
   assertEqual(enemy4_actual.y, enemy4_expected_y, "Scenario 4 - Enemy Y position");
+
+  // Scenario 5: Player below, chaser close (test vertical overshoot prevention)
+  console.log("\n--- Scenario 5: Player below, chaser close (vertical overshoot) ---");
+  const player5 = { ...mockPlayer, x: 50, y: 100, speed: 5 }; // Player is 2 units below
+  const enemy5_initial = { ...mockEnemy, x: 50, y: 98 };
+  // Vertical speed towards player is 4.25. Player is 2 units away. Enemy should move to player.y.
+  const enemy5_expected_x = 50; // No horizontal movement
+  const enemy5_expected_y = player5.y; // Should stop exactly at player's y
+
+  const enemy5_actual = updateChaserMovement(enemy5_initial, player5);
+  assertEqual(enemy5_actual.x, enemy5_expected_x, "Scenario 5 - Enemy X position");
+  assertEqual(enemy5_actual.y, enemy5_expected_y, "Scenario 5 - Enemy Y position (vertical overshoot)");
 
 
   console.log("\n--- Test Summary ---");
