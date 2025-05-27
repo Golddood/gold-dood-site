@@ -37,6 +37,7 @@ const MIN_COLLISION_OVERLAP = 8;
   const HIT_INVINCIBILITY_MS = 800;
   // One single flag, toggled on/off by handlePlayerHit
   let playerInvincible = false;
+  let currentSessionId = 0;
 
   // ─── 2) Core Game State ──────────────────────────────────
   const bullets     = [];
@@ -109,6 +110,9 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 4) Reset Logic ───────────────────────────────────────
   const resetGame = () => {
+    currentSessionId++;
+    const loopSessionId = currentSessionId;
+    console.log(`[SESSION_DEBUG] resetGame: Incremented currentSessionId to ${currentSessionId}. loopSessionId for this reset is ${loopSessionId}.`);
     console.log('[RESET_DEBUG] resetGame START');
     gameRunning = false;
     cancelAnimationFrame(animationId);
@@ -157,8 +161,9 @@ const MIN_COLLISION_OVERLAP = 8;
 
     // then kick off the loop
     gameStartTimeoutId = setTimeout(() => {
+      console.log(`[SESSION_DEBUG] Scheduling loop start for session ${loopSessionId}. Current global session: ${currentSessionId}`);
       gameRunning = true;
-      animationId = requestAnimationFrame(loop);
+      animationId = requestAnimationFrame(() => loop(loopSessionId)); // NEW
     }, 300);
     console.log(`[RESET_DEBUG] resetGame END. playerInvincible: ${playerInvincible}, livesRef.current: ${livesRef.current}`);
   };
@@ -186,9 +191,16 @@ const MIN_COLLISION_OVERLAP = 8;
   window.addEventListener('keyup',   handleKeyUp);
 
   // ─── 6) Main Game Loop ───────────────────────────────────
-  const loop = () => {
-    if (!gameRunning) return;
-    animationId = requestAnimationFrame(loop);
+  const loop = (thisLoopSessionId) => {
+    if (thisLoopSessionId !== currentSessionId) {
+      console.log(`[SESSION_DEBUG] Stale loop (session ${thisLoopSessionId}) detected. Current global session: ${currentSessionId}. Bailing out.`);
+      return;
+    }
+    if (!gameRunning) {
+      console.log(`[SESSION_DEBUG] gameRunning is false for session ${thisLoopSessionId}. Bailing out.`);
+      return;
+    }
+    animationId = requestAnimationFrame(() => loop(thisLoopSessionId)); // NEW
     frameCount++;
 
     // clear screen
@@ -336,47 +348,55 @@ if (enemy.y < 0) {
 }      // collision check
 // after drawHitbox(ctx, enemy, boxType);
 
-const playerBox = getHitbox(player, 'player');
-const enemyBox  = getHitbox(enemy,  boxType);
+const enemyBoxForCollision = getHitbox(enemy, boxType); // Calculate enemy box
 
-console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, PRE-CHECK PlayerBox:`, playerBox, `EnemyBox (${i}):`, enemyBox);
-if (checkCollision(playerBox, enemyBox)) {
-  console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, CHECK PASSED for enemy ${i}. PlayerInvincible: ${playerInvincible}`);
-  if (!playerInvincible) {
-  // compute actual overlap on each axis
-  const overlapX = Math.min(
-    playerBox.x + playerBox.width,
-    enemyBox.x  + enemyBox.width
-  ) - Math.max(playerBox.x, enemyBox.x);
+if (enemyBoxForCollision.y + enemyBoxForCollision.height < LOGIC_HEIGHT / 2) {
+    // Enemy is too high, collision check with player is skipped for this frame.
+    console.log(`[COLLISION_GUARD] Frame: ${frameCount}, Skipping enemy ${i} (type ${enemy.type}). EnemyBox bottom: ${enemyBoxForCollision.y + enemyBoxForCollision.height}. Player movement area top: ${LOGIC_HEIGHT / 2}`);
+} else {
+    // Enemy is in a potentially interactive zone, proceed with player collision check.
+    const playerBox = getHitbox(player, 'player');
+    // The PRE-CHECK log currently uses 'enemyBox'. Ensure it uses 'enemyBoxForCollision'.
+    // Modify the existing PRE-CHECK log:
+    console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, PRE-CHECK PlayerBox:`, playerBox, `EnemyBox (${i}):`, enemyBoxForCollision);
+    
+    if (checkCollision(playerBox, enemyBoxForCollision)) {
+        console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, CHECK PASSED for enemy ${i}. PlayerInvincible: ${playerInvincible}`);
+        if (!playerInvincible) {
+        // compute actual overlap on each axis
+        const overlapX = Math.min(
+          playerBox.x + playerBox.width,
+          enemyBoxForCollision.x  + enemyBoxForCollision.width
+        ) - Math.max(playerBox.x, enemyBoxForCollision.x);
 
-  const overlapY = Math.min(
-    playerBox.y + playerBox.height,
-    enemyBox.y  + enemyBox.height
-  ) - Math.max(playerBox.y, enemyBox.y);
-  console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, Enemy ${i} Overlap: X=${overlapX}, Y=${overlapY}. MIN_OVERLAP=${MIN_COLLISION_OVERLAP}`);
+        const overlapY = Math.min(
+          playerBox.y + playerBox.height,
+          enemyBoxForCollision.y  + enemyBoxForCollision.height
+        ) - Math.max(playerBox.y, enemyBoxForCollision.y);
+        console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, Enemy ${i} Overlap: X=${overlapX}, Y=${overlapY}. MIN_OVERLAP=${MIN_COLLISION_OVERLAP}`);
 
-  // only a real hit if both overlaps exceed our threshold
-  if (overlapX > MIN_COLLISION_OVERLAP && overlapY > MIN_COLLISION_OVERLAP) {
-    console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, THRESHOLD PASSED for enemy ${i}. Calling handlePlayerHit.`);
-    console.log(
-      '💥 Real hit:', { overlapX, overlapY },
-      'playerBox', playerBox,
-      'enemyBox', enemyBox
-    );
+        // only a real hit if both overlaps exceed our threshold
+        if (overlapX > MIN_COLLISION_OVERLAP && overlapY > MIN_COLLISION_OVERLAP) {
+          console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, THRESHOLD PASSED for enemy ${i}. Calling handlePlayerHit.`);
+          console.log(
+            '💥 Real hit:', { overlapX, overlapY },
+            'playerBox', playerBox,
+            'enemyBox', enemyBoxForCollision
+          );
 
-    // HYPER-AGGRESSIVE DIAGNOSTIC DRAW FOR COLLIDING ENEMY
-    console.log('[DIAGNOSTIC DRAW] Attempting to highlight colliding enemy. Enemy details:', enemy, 'EnemyBox:', enemyBox);
+          // HYPER-AGGRESSIVE DIAGNOSTIC DRAW FOR COLLIDING ENEMY
+          console.log('[DIAGNOSTIC DRAW] Attempting to highlight colliding enemy. Enemy details:', enemy, 'EnemyBox:', enemyBoxForCollision);
 
-    // Clear a slightly larger area around the enemy's hitbox to ensure visibility
-    ctx.clearRect(enemyBox.x - 5, enemyBox.y - 5, enemyBox.width + 10, enemyBox.height + 10);
+          // Clear a slightly larger area around the enemy's hitbox to ensure visibility
+          ctx.clearRect(enemyBoxForCollision.x - 5, enemyBoxForCollision.y - 5, enemyBoxForCollision.width + 10, enemyBoxForCollision.height + 10);
 
-    // Prominent hitbox style
-    ctx.strokeStyle = 'yellow'; // Bright yellow
-    ctx.lineWidth = 4;          // Very thick
-    ctx.setLineDash([5, 3]);    // Dashed line
+          // Prominent hitbox style
+          ctx.strokeStyle = 'yellow'; // Bright yellow
+          ctx.lineWidth = 4;          // Very thick
+          ctx.setLineDash([5, 3]);    // Dashed line
 
-    // Re-draw the hitbox
-    ctx.strokeRect(enemyBox.x, enemyBox.y, enemyBox.width, enemyBox.height);
+          // Re-draw the hitbox
+          ctx.strokeRect(enemyBoxForCollision.x, enemyBoxForCollision.y, enemyBoxForCollision.width, enemyBoxForCollision.height);
 
     // Reset line dash for subsequent drawing
     ctx.setLineDash([]);
@@ -415,6 +435,7 @@ if (checkCollision(playerBox, enemyBox)) {
   console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, CHECK PASSED but player invincible for enemy ${i}. No hit registered.`);
 }
 }
+} // This closes the new 'else' block for the guard condition
 
 // off‐screen removal
 if (enemy.y > LOGIC_HEIGHT) {
