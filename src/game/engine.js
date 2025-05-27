@@ -109,6 +109,8 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 4) Reset Logic ───────────────────────────────────────
   const resetGame = () => {
+    gameRunning = false;
+    cancelAnimationFrame(animationId);
     // clear existing timeouts
     clearTimeout(invincibilityTimeoutId);
     clearTimeout(gameStartTimeoutId);
