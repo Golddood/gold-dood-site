@@ -254,9 +254,29 @@ const MIN_COLLISION_OVERLAP = 8;
 
       // movement
       if (enemy.type === 'chaser') {
-        if (enemy.x < player.x) enemy.x += 1.2;
-        if (enemy.x > player.x) enemy.x -= 1.2;
-        enemy.y += 1.2;
+        const horizontalSpeed = 0.85 * player.speed;
+        const verticalSpeedPlayerTarget = 0.85 * player.speed;
+        const standardFallSpeed = 1.5;
+
+        // Horizontal movement
+        if (enemy.x < player.x) {
+          enemy.x += horizontalSpeed;
+          // Prevent overshooting
+          if (enemy.x > player.x) enemy.x = player.x;
+        } else if (enemy.x > player.x) {
+          enemy.x -= horizontalSpeed;
+          // Prevent overshooting
+          if (enemy.x < player.x) enemy.x = player.x;
+        }
+
+        // Vertical movement
+        if (player.y > enemy.y) {
+          enemy.y += verticalSpeedPlayerTarget;
+        } else {
+          enemy.y += standardFallSpeed;
+        }
+
+        // Flop animation
         enemy.flopTimer--;
         if (enemy.flopTimer <= 0) {
           enemy.flopTimer    = Math.random() * 120 + 60;
