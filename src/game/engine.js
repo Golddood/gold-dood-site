@@ -109,6 +109,7 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 4) Reset Logic ───────────────────────────────────────
   const resetGame = () => {
+    console.log('[RESET_DEBUG] resetGame START');
     gameRunning = false;
     cancelAnimationFrame(animationId);
     // clear existing timeouts
@@ -159,6 +160,7 @@ const MIN_COLLISION_OVERLAP = 8;
       gameRunning = true;
       animationId = requestAnimationFrame(loop);
     }, 300);
+    console.log(`[RESET_DEBUG] resetGame END. playerInvincible: ${playerInvincible}, livesRef.current: ${livesRef.current}`);
   };
   gameResetRef.current = resetGame;
 
@@ -241,6 +243,7 @@ const MIN_COLLISION_OVERLAP = 8;
     console.log('Loop Start - Enemies Array:', JSON.stringify(enemies.map(e => ({ x: e.x, y: e.y, type: e.type, width: e.width, height: e.height, imageSrc: e.image ? e.image.src : 'No image', imageComplete: e.image ? e.image.complete : 'No image' }))));
     for (let i = enemies.length - 1; i >= 0; i--) {
       const enemy   = enemies[i];
+      console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, Processing enemy ${i}: Type: ${enemy.type}, X: ${enemy.x}, Y: ${enemy.y}, Rotation: ${enemy.rotation || 0}, PlayerInvincible: ${playerInvincible}`);
       console.log('Processing Enemy:', {
         index: i,
         x: enemy.x,
@@ -336,7 +339,10 @@ if (enemy.y < 0) {
 const playerBox = getHitbox(player, 'player');
 const enemyBox  = getHitbox(enemy,  boxType);
 
-if (!playerInvincible && checkCollision(playerBox, enemyBox)) {
+console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, PRE-CHECK PlayerBox:`, playerBox, `EnemyBox (${i}):`, enemyBox);
+if (checkCollision(playerBox, enemyBox)) {
+  console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, CHECK PASSED for enemy ${i}. PlayerInvincible: ${playerInvincible}`);
+  if (!playerInvincible) {
   // compute actual overlap on each axis
   const overlapX = Math.min(
     playerBox.x + playerBox.width,
@@ -347,9 +353,11 @@ if (!playerInvincible && checkCollision(playerBox, enemyBox)) {
     playerBox.y + playerBox.height,
     enemyBox.y  + enemyBox.height
   ) - Math.max(playerBox.y, enemyBox.y);
+  console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, Enemy ${i} Overlap: X=${overlapX}, Y=${overlapY}. MIN_OVERLAP=${MIN_COLLISION_OVERLAP}`);
 
   // only a real hit if both overlaps exceed our threshold
   if (overlapX > MIN_COLLISION_OVERLAP && overlapY > MIN_COLLISION_OVERLAP) {
+    console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, THRESHOLD PASSED for enemy ${i}. Calling handlePlayerHit.`);
     console.log(
       '💥 Real hit:', { overlapX, overlapY },
       'playerBox', playerBox,
@@ -398,8 +406,14 @@ if (!playerInvincible && checkCollision(playerBox, enemyBox)) {
     // Existing player boundary checks later in the loop will handle clamping.
     // Enemy is NOT removed.
     handlePlayerHit();
+    console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, AFTER handlePlayerHit for enemy ${i}. Current lives: ${livesRef.current}`);
     continue;
+  } else {
+      console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, THRESHOLD FAILED for enemy ${i}. No hit registered.`);
   }
+} else {
+  console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, CHECK PASSED but player invincible for enemy ${i}. No hit registered.`);
+}
 }
 
 // off‐screen removal

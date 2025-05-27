@@ -19,6 +19,6 @@ export const PLAYER_SIZE = 52;
 export const HITBOXES = {
   player: { offsetX: 15, offsetY: 2, width: 20, height: 46 },
   coin: { offsetX: 4, offsetY: 4, width: 22, height: 22 },
-  enemyChaser: { offsetX: 0, offsetY: 10, width: 64, height: 44 },
+  enemyChaser: { offsetX: 8, offsetY: 16, width: 48, height: 32 },
   enemyShooter: { offsetX: 6, offsetY: 1, width: 50, height: 49 },
 };
