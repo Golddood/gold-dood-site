@@ -36,7 +36,7 @@ export function spawnEnemies({ enemies, player, enemyMoveImage, enemyShootImage,
   // New Projected Collision Check
   const hypotheticalEnemyForCheck = {
     x: x,
-    y: -ENEMY_SIZE, // Check collision at the actual spawn line (off-screen top)
+    y: player.y, // Projecting enemy to player's Y level for the check
     width: ENEMY_SIZE,
     height: ENEMY_SIZE,
   };

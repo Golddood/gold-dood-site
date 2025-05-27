@@ -65,7 +65,7 @@ const MIN_COLLISION_OVERLAP = 8;
     y: LOGIC_HEIGHT - PLAYER_SIZE*1.5,
     width: PLAYER_SIZE,
     height: PLAYER_SIZE,
-    speed: 7 * SCALE,
+    speed: 5 * SCALE,
   };
 
   // ─── 3) Hit & Game-Over Handlers ─────────────────────────
@@ -258,20 +258,16 @@ const MIN_COLLISION_OVERLAP = 8;
         const horizontalSpeed = 0.85 * player.speed;
         const verticalSpeedPlayerTarget = 0.85 * player.speed;
         const standardFallSpeed = 1.5;
-        const DEAD_ZONE = 2.0; // pixels
 
-        console.log(`Chaser Debug: enemy.id=${enemy.id || 'N/A'}, enemy.x=${enemy.x.toFixed(2)}, player.x=${player.x.toFixed(2)}, horizontalSpeed=${horizontalSpeed.toFixed(2)}, player.speed=${player.speed.toFixed(2)}, SCALE=${SCALE}`);
         // Horizontal movement
-        if (Math.abs(enemy.x - player.x) > DEAD_ZONE) {
-          if (enemy.x < player.x) {
-            enemy.x += horizontalSpeed;
-            // Prevent overshooting
-            if (enemy.x > player.x) enemy.x = player.x;
-          } else if (enemy.x > player.x) {
-            enemy.x -= horizontalSpeed;
-            // Prevent overshooting
-            if (enemy.x < player.x) enemy.x = player.x;
-          }
+        if (enemy.x < player.x) {
+          enemy.x += horizontalSpeed;
+          // Prevent overshooting
+          if (enemy.x > player.x) enemy.x = player.x;
+        } else if (enemy.x > player.x) {
+          enemy.x -= horizontalSpeed;
+          // Prevent overshooting
+          if (enemy.x < player.x) enemy.x = player.x;
         }
 
         // Vertical movement
