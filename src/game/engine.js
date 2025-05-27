@@ -253,14 +253,14 @@ const MIN_COLLISION_OVERLAP = 8;
         imageSrc: enemy.image ? enemy.image.src : 'No image object',
         imageComplete: enemy.image ? enemy.image.complete : 'No image object'
       });
-      const boxType = enemy.type === 'chaser' ? 'enemyChaser' : 'enemyShooter';
+        // Since your spawner sets enemy.type to "enemyChaser" or "enemyShooter":
+        const boxType = enemy.type;
 
       // movement
-      if (enemy.type === 'chaser') {
-        const horizontalSpeed = 0.85 * player.speed;
-        const verticalSpeedPlayerTarget = 0.85 * player.speed;
+      if (enemy.type === 'enemyChaser') {
+        const horizontalSpeed = 0.65 * player.speed;
+        const verticalSpeedPlayerTarget = 0.65 * player.speed;
         const standardFallSpeed = 1.5;
-
         // Horizontal movement
         if (enemy.x < player.x) {
           enemy.x += horizontalSpeed;
@@ -276,10 +276,9 @@ const MIN_COLLISION_OVERLAP = 8;
         if (player.y > enemy.y) { // Player is below enemy
           // Move towards player, but don't overshoot
           enemy.y = Math.min(player.y, enemy.y + verticalSpeedPlayerTarget);
-        } else { // Player is above or at the same level
-          enemy.y += standardFallSpeed;
-        }
-
+      } else {
+        enemy.y += 1.5;
+      }
         // Flop animation
         enemy.flopTimer--;
         if (enemy.flopTimer <= 0) {
@@ -299,7 +298,7 @@ const MIN_COLLISION_OVERLAP = 8;
         try {
           ctx.save();
           ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
-          if (enemy.type === 'chaser') ctx.rotate(enemy.rotation || 0);
+          if (enemy.type === 'enemyChaser') ctx.rotate(enemy.rotation || 0);
           ctx.drawImage(
             enemy.image,
             -enemy.width/2,
@@ -327,8 +326,11 @@ const MIN_COLLISION_OVERLAP = 8;
         ctx.fillText(`FALLBACK ${enemy.type}`, enemy.x + 2, enemy.y + 10);
       }
       drawHitbox(ctx, enemy, boxType); // Hitbox is lime
-
-      // collision check
+ // ─── skip collision until enemy is on–screen ──────────────
+if (enemy.y < 0) {
+   // it’s still above the top edge—skip checking collision
+   continue;
+}      // collision check
 // after drawHitbox(ctx, enemy, boxType);
 
 const playerBox = getHitbox(player, 'player');
