@@ -26,7 +26,7 @@ export function runGameEngine({
   livesRef,
   livesModeRef,
   gameResetRef,
-  paused,
+  pausedRef,
   setPaused,
 }) {
   // ─── 1) Canvas & Invincibility Setup ─────────────────────
@@ -207,7 +207,7 @@ const MIN_COLLISION_OVERLAP = 8;
       return;
     }
 
-    if (paused) {
+    if (pausedRef.current) {
       // Request the next frame to keep the loop alive and responsive to unpause
       animationId = requestAnimationFrame(() => loop(thisLoopSessionId));
 

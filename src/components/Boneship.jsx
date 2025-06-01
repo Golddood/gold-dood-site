@@ -28,6 +28,7 @@ function Boneship() {
   const [showPlayer, setShowPlayer] = useState(true);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(paused);
 
   // Asset Refs
   const playerImageRef = useRef();
@@ -54,6 +55,10 @@ function Boneship() {
   useEffect(() => {
     livesModeRef.current = livesMode;
   }, [livesMode]);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
   // Reset when mode selected & start pressed
   useEffect(() => {
@@ -86,7 +91,7 @@ function Boneship() {
       livesRef,
       livesModeRef,
       gameResetRef,
-      paused,
+      pausedRef,
       setPaused,
     });
 
@@ -153,6 +158,7 @@ function Boneship() {
                     setLives(3);
                     livesRef.current = 3;
                   }
+                     setPaused(false); // Add this line
                   // kick off engine reset + start
                   setGameStarted(true);
                 }}
