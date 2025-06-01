@@ -24,7 +24,7 @@ export function runGameEngine({
   setHighTime,
   setLives,
   livesRef,
-  livesMode,
+  livesModeRef,
   gameResetRef,
 }) {
   // ─── 1) Canvas & Invincibility Setup ─────────────────────
@@ -72,7 +72,7 @@ const MIN_COLLISION_OVERLAP = 8;
   // ─── 3) Hit & Game-Over Handlers ─────────────────────────
   const handlePlayerHit = () => {
     // New guard: If in lives mode and lives are already 0 or less, do nothing.
-    if (livesMode === 'lives' && livesRef.current <= 0) {
+    if (livesModeRef.current === 'lives' && livesRef.current <= 0) {
       return;
     }
     // Existing guard
@@ -83,7 +83,7 @@ const MIN_COLLISION_OVERLAP = 8;
 
     console.log('💥 Player hit! Lives before hit:', livesRef.current);
 
-    if (livesMode === 'lives') {
+    if (livesModeRef.current === 'lives') {
       const newLives = livesRef.current - 1;
       livesRef.current = newLives;
       setLives(newLives);
@@ -149,7 +149,7 @@ const MIN_COLLISION_OVERLAP = 8;
     setShowPlayer(true);
 
     // reset lives
-    if (livesMode === 'lives') {
+    if (livesModeRef.current === 'lives') {
       livesRef.current = 3;
       setLives(3);
       console.log('[resetGame] Lives reset. Current lives:', livesRef.current);
@@ -444,7 +444,7 @@ if (enemy.y > LOGIC_HEIGHT) {
     }
 
     // draw lives
-    if (livesMode === 'lives') {
+    if (livesModeRef.current === 'lives') {
       ctx.font          = `${16 * SCALE}px Arial`;
       ctx.textAlign     = 'right';
       ctx.textBaseline  = 'top';

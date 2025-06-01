@@ -24,6 +24,7 @@ function Boneship() {
   const [livesMode, setLivesMode] = useState('instant');
   const [lives, setLives] = useState(3);
   const livesRef = useRef(3);
+  const livesModeRef = useRef(livesMode);
   const [showPlayer, setShowPlayer] = useState(true);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
 
@@ -48,6 +49,10 @@ function Boneship() {
   useEffect(() => {
     livesRef.current = lives;
   }, [lives]);
+
+  useEffect(() => {
+    livesModeRef.current = livesMode;
+  }, [livesMode]);
 
   // Reset when mode selected & start pressed
   useEffect(() => {
@@ -78,7 +83,7 @@ function Boneship() {
       setHighTime,
       setLives,
       livesRef,
-      livesMode,
+      livesModeRef,
       gameResetRef,
     });
 
