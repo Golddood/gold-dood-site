@@ -9,6 +9,9 @@ export function spawnEnemies({ enemies, player, enemyMoveImage, enemyShootImage,
   if (enemies.length >= MAX_ENEMIES) return;
 
   const isChaser = Math.random() < 0.3;
+  if (isChaser) {
+    console.log('[SpawnAttempt] Attempting to spawn a CHASER.');
+  }
 
   // Avoid more than one chaser
   if (isChaser && enemies.some(e => e.type === 'chaser')) return;
@@ -43,6 +46,9 @@ export function spawnEnemies({ enemies, player, enemyMoveImage, enemyShootImage,
   const projectedEnemyHitbox = getHitbox(hypotheticalEnemyForCheck, enemyType);
 
   if (checkCollision(projectedEnemyHitbox, playerHitbox)) {
+    if (isChaser) {
+      console.log('[SpawnRejected] CHASER spawn rejected due to projected collision.');
+    }
     // If a collision is projected, do not spawn this enemy.
     // Optional: Log why spawn was aborted
     // console.log(`Spawn aborted for ${enemyType} at x: ${x} due to projected collision with player.`);
