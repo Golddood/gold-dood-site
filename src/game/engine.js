@@ -71,12 +71,18 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 3) Hit & Game-Over Handlers ─────────────────────────
   const handlePlayerHit = () => {
+    console.log("[DEBUG] handlePlayerHit ENTERED. gameRunning:", gameRunning, "playerInvincible:", playerInvincible, "livesRef.current:", livesRef.current, "livesMode:", livesMode);
     // New guard: If in lives mode and lives are already 0 or less, do nothing.
     if (livesMode === 'lives' && livesRef.current <= 0) {
       return;
     }
     // Existing guard
-    if (!gameRunning || playerInvincible) return;
+    if (!gameRunning || playerInvincible) {
+      console.log(`[DEBUG] handlePlayerHit GUARD ACTIVATED. gameRunning: ${gameRunning}, playerInvincible: ${playerInvincible}. Hit processing SKIPPED.`);
+      return;
+    } else {
+      console.log(`[DEBUG] handlePlayerHit GUARD PASSED. gameRunning: ${gameRunning}, playerInvincible: ${playerInvincible}. Hit processing WILL PROCEED.`);
+    }
     // turn on invincibility
     playerInvincible = true;
     setTimeout(() => (playerInvincible = false), HIT_INVINCIBILITY_MS);
@@ -192,6 +198,7 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 6) Main Game Loop ───────────────────────────────────
   const loop = (thisLoopSessionId) => {
+    console.log("[DEBUG] Loop entered. gameRunning:", gameRunning, "animationId:", animationId, "thisLoopSessionId:", thisLoopSessionId, "currentSessionId:", currentSessionId);
     if (thisLoopSessionId !== currentSessionId) {
       console.log(`[SESSION_DEBUG] Stale loop (session ${thisLoopSessionId}) detected. Current global session: ${currentSessionId}. Bailing out.`);
       return;
@@ -343,6 +350,15 @@ const MIN_COLLISION_OVERLAP = 8;
       }
       drawHitbox(ctx, enemy, boxType); // Hitbox is lime
 
+      // User requested debug log
+      console.log("[DEBUG] Attempting to skip enemy based on y+height:", { y: enemy.y, height: enemy.height, sum: enemy.y + enemy.height });
+
+      // User specified skip-guard for enemies fully off-screen at the top
+      if (enemy.y + enemy.height < 0) {
+        console.log(`[DEBUG] Guard (enemy.y + enemy.height < 0) ACTIVATED. Skipping enemy ${i} (type ${enemy.type}). y: ${enemy.y}, height: ${enemy.height}`);
+        continue; // Skip further processing for this enemy in this frame
+      }
+
       // collision check
 // after drawHitbox(ctx, enemy, boxType);
 
@@ -357,7 +373,7 @@ if (enemyBoxForCollision.y + enemyBoxForCollision.height < LOGIC_HEIGHT / 2) {
     // The PRE-CHECK log currently uses 'enemyBox'. Ensure it uses 'enemyBoxForCollision'.
     // Modify the existing PRE-CHECK log:
     console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, PRE-CHECK PlayerBox:`, playerBox, `EnemyBox (${i}):`, enemyBoxForCollision);
-    
+
     if (checkCollision(playerBox, enemyBoxForCollision)) {
         console.log(`[COLLISION_DEBUG] Frame: ${frameCount}, CHECK PASSED for enemy ${i}. PlayerInvincible: ${playerInvincible}`);
         if (!playerInvincible) {
