@@ -27,6 +27,7 @@ function Boneship() {
   const livesModeRef = useRef(livesMode);
   const [showPlayer, setShowPlayer] = useState(true);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   // Asset Refs
   const playerImageRef = useRef();
@@ -85,6 +86,8 @@ function Boneship() {
       livesRef,
       livesModeRef,
       gameResetRef,
+      paused,
+      setPaused,
     });
 
     return cleanup;
@@ -105,6 +108,14 @@ function Boneship() {
             backgroundColor: 'black',
           }}
         />
+        {gameStarted && !gameOver && (
+          <button
+            className="absolute top-4 left-4 z-20 bg-blue-600 text-white px-3 py-1 rounded"
+            onClick={() => setPaused((prev) => !prev)}
+          >
+            {paused ? 'Resume' : 'Pause'}
+          </button>
+        )}
         {!gameStarted && (
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center gap-2">
             {!modeSelected ? (

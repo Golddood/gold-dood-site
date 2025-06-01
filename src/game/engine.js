@@ -26,6 +26,8 @@ export function runGameEngine({
   livesRef,
   livesModeRef,
   gameResetRef,
+  paused,
+  setPaused,
 }) {
   // ─── 1) Canvas & Invincibility Setup ─────────────────────
   const ctx = canvas.getContext('2d');
@@ -171,6 +173,10 @@ const MIN_COLLISION_OVERLAP = 8;
 
   // ─── 5) Input Listeners ──────────────────────────────────
   const handleKeyDown = (e) => {
+    if (e.key.toLowerCase() === 'p') {
+      setPaused && setPaused((prev) => !prev); // Toggle pause state
+      return; // Prevent other actions if 'P' is pressed
+    }
     keys[e.key] = true;
     if ((e.key === ' ' || e.key === 'Spacebar') && canShoot) {
       bullets.push({
@@ -199,6 +205,24 @@ const MIN_COLLISION_OVERLAP = 8;
     if (!gameRunning) {
       console.log(`[SESSION_DEBUG] gameRunning is false for session ${thisLoopSessionId}. Bailing out.`);
       return;
+    }
+
+    if (paused) {
+      // Request the next frame to keep the loop alive and responsive to unpause
+      animationId = requestAnimationFrame(() => loop(thisLoopSessionId));
+
+      // Draw "Paused" overlay
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black
+      ctx.fillRect(0, 0, LOGIC_WIDTH, LOGIC_HEIGHT);
+
+      ctx.fillStyle = 'white';
+      ctx.font = `${32 * SCALE}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Paused', LOGIC_WIDTH / 2, LOGIC_HEIGHT / 2);
+      ctx.restore();
+      return; // Skip the rest of the game logic for this frame
     }
     animationId = requestAnimationFrame(() => loop(thisLoopSessionId)); // NEW
     frameCount++;
